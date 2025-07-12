@@ -1,0 +1,17 @@
+regions:
+  - us-east-1
+  - ap-northeast-2
+  - global
+
+account-blocklist:
+  - "000000000000"
+
+accounts:
+  "123456789012":
+    aliases:
+      - dev
+    filters:
+      IAMUser:
+        - dev-admin
+      IAMUserLoginProfile:
+        - dev-admin

@@ -1,0 +1,11 @@
+nuke-config.yaml
+*.log
+aws-nuke-*/
+aws-nuke.tar.gz
+__pycache__/
+*.pyc
+node_modules/
+config.json
+*.tmp
+.vscode/
+.DS_Store

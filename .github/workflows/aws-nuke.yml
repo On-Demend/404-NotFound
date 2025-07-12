@@ -1,0 +1,75 @@
+name: AWS Nuke Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      alias:
+        description: "계정 별칭"
+        required: true
+      iam_user:
+        description: "IAM 사용자 이름"
+        required: true
+      iam_profile:
+        description: "IAM 로그인 프로파일 이름"
+        required: true
+      account_id:
+        description: "계정 ID"
+        required: true
+      exclude_id:
+        description: "제외할 계정 ID"
+        required: false
+      regions:
+        description: "리전 리스트 (쉼표로 구분)"
+        required: true
+      dry_run:
+        description: "Dry Run 여부 (true/false)"
+        required: false
+        default: "true"
+
+jobs:
+  aws-nuke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install latest AWS Nuke
+        run: |
+          LATEST=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest | grep tag_name | cut -d '"' -f 4)
+          curl -L -o aws-nuke.tar.gz https://github.com/ekristen/aws-nuke/releases/download/${LATEST}/aws-nuke-${LATEST#v}-linux-amd64.tar.gz
+          tar -xvzf aws-nuke.tar.gz
+          sudo mv aws-nuke-*/aws-nuke /usr/local/bin/aws-nuke
+
+      - name: Generate nuke-config.yaml
+        run: |
+          REGIONS=$(echo "${{ github.event.inputs.regions }}" | sed 's/,/","/g')
+          cat <<EOF > nuke-config.yaml
+regions: ["$REGIONS","global"]
+account-blocklist:
+  - "${{ github.event.inputs.exclude_id }}"
+accounts:
+  "${{ github.event.inputs.account_id }}":
+    aliases:
+      - "${{ github.event.inputs.alias }}"
+    filters:
+      IAMUser:
+        - "${{ github.event.inputs.iam_user }}"
+      IAMUserLoginProfile:
+        - "${{ github.event.inputs.iam_profile }}"
+EOF
+
+      - name: Run AWS Nuke
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            aws-nuke -c nuke-config.yaml
+          else
+            aws-nuke -c nuke-config.yaml --no-dry-run --force
+          fi
