@@ -36,25 +36,26 @@ jobs:
   aws-nuke:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
-      AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
-      AWS_REGION: us-east-1
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Mask AWS credentials in logs
         run: |
-          echo "::add-mask::${AWS_ACCESS_KEY_ID}"
-          echo "::add-mask::${AWS_SECRET_ACCESS_KEY}"
+          echo "::add-mask::${{ github.event.inputs.aws_access_key_id }}"
+          echo "::add-mask::${{ github.event.inputs.aws_secret_access_key }}"
+
+      - name: Set AWS credentials as environment variables
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ github.event.inputs.aws_access_key_id }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ github.event.inputs.aws_secret_access_key }}" >> $GITHUB_ENV
+          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
 
       - name: Install latest AWS Nuke
         run: |
           LATEST=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest | grep tag_name | cut -d '"' -f 4)
           curl -L -o aws-nuke.tar.gz https://github.com/ekristen/aws-nuke/releases/download/${LATEST}/aws-nuke-${LATEST#v}-linux-amd64.tar.gz
-          tar -xvzf aws-nuke.tar.gz
+          tar -xzf aws-nuke.tar.gz
           sudo mv aws-nuke-*/aws-nuke /usr/local/bin/aws-nuke
 
       - name: Generate nuke-config.yaml
