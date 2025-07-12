@@ -55,11 +55,16 @@ jobs:
 
       - name: Install latest AWS Nuke
         run: |
-          LATEST=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest | jq -r '.tag_name')
-          ZIP_URL="https://github.com/ekristen/aws-nuke/releases/download/${LATEST}/aws-nuke-${LATEST#v}-linux-amd64.zip"
-          curl -L -o aws-nuke.zip "$ZIP_URL"
-          unzip aws-nuke.zip
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+          LATEST_JSON=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest)
+          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("linux-amd64$")) | .browser_download_url')
+
+          curl -L -o aws-nuke "$DOWNLOAD_URL"
+          chmod +x aws-nuke
           sudo mv aws-nuke /usr/local/bin/aws-nuke
+
 
 
       - name: Generate nuke-config.yaml
