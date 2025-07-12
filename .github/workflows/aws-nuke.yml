@@ -38,7 +38,6 @@ on:
 
 jobs:
   aws-nuke:
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
