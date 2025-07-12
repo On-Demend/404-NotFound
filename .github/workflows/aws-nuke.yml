@@ -31,7 +31,9 @@ on:
       aws_secret_access_key:
         description: "AWS SECRET ACCESS KEY"
         required: true
-
+  push:
+    branches:
+      - main
 jobs:
   aws-nuke:
     runs-on: ubuntu-latest
