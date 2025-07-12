@@ -2,6 +2,9 @@ name: AWS Nuke Trigger
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
     inputs:
       alias:
         description: "계정 별칭"
