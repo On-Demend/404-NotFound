@@ -60,25 +60,15 @@ jobs:
             EXCLUDE_ID="000000000000"
           fi
 
-          cat <<EOF > nuke-config.yaml
-regions: ["$REGIONS","global"]
-account-blocklist:
-  - "$EXCLUDE_ID"
-accounts:
-  "${{ github.event.inputs.account_id }}":
-    aliases:
-      - "${{ github.event.inputs.alias }}"
-    filters:
-      IAMUser:
-        - "${{ github.event.inputs.iam_user }}"
-      IAMUserLoginProfile:
-        - "${{ github.event.inputs.iam_profile }}"
-EOF
-
-      - name: Run AWS Nuke
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            aws-nuke -c nuke-config.yaml
-          else
-            aws-nuke -c nuke-config.yaml --no-dry-run --force
-          fi
+          echo "regions: [\"$REGIONS\",\"global\"]" > nuke-config.yaml
+          echo "account-blocklist:" >> nuke-config.yaml
+          echo "  - \"$EXCLUDE_ID\"" >> nuke-config.yaml
+          echo "accounts:" >> nuke-config.yaml
+          echo "  \"${{ github.event.inputs.account_id }}\":" >> nuke-config.yaml
+          echo "    aliases:" >> nuke-config.yaml
+          echo "      - \"${{ github.event.inputs.alias }}\"" >> nuke-config.yaml
+          echo "    filters:" >> nuke-config.yaml
+          echo "      IAMUser:" >> nuke-config.yaml
+          echo "        - \"${{ github.event.inputs.iam_user }}\"" >> nuke-config.yaml
+          echo "      IAMUserLoginProfile:" >> nuke-config.yaml
+          echo "        - \"${{ github.event.inputs.iam_profile }}\"" >> nuke-config.yaml
