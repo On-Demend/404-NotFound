@@ -1,22 +1,52 @@
-from flask import Flask, request, jsonify
-from utils.config_generator import generate_config
+from flask import Flask, render_template, request, jsonify
 import subprocess
+import yaml
 import os
 
 app = Flask(__name__)
 
-@app.route("/generate", methods=["POST"])
-def generate():
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/run', methods=['POST'])
+def run_nuke():
     try:
-        data = request.get_json()
-        config_path = generate_config(data)
+        data = request.json
 
-        # GitHub Actions 트리거 (로컬에선 시뮬레이션)
-        # 또는 subprocess.run([...])으로 aws-nuke 직접 실행
+        config = {
+            "regions": data['regions'] + ["global"],
+            "account-blocklist": [data['exclude_id'] or "000000000000"],
+            "accounts": {
+                data["account_id"]: {
+                    "aliases": [data["alias"]],
+                    "filters": {
+                        "IAMUser": [data["iam_user"]],
+                        "IAMUserLoginProfile": [data["iam_profile"]]
+                    }
+                }
+            }
+        }
 
-        return jsonify({"status": "started", "config_path": config_path})
+        with open("nuke-config.yaml", "w") as f:
+            yaml.dump(config, f)
+
+        env = os.environ.copy()
+        env["AWS_ACCESS_KEY_ID"] = data["aws_access_key"]
+        env["AWS_SECRET_ACCESS_KEY"] = data["aws_secret_key"]
+        env["AWS_REGION"] = data["regions"][0] if data["regions"] else "us-east-1"
+
+        cmd = ["aws-nuke", "-c", "nuke-config.yaml", "--no-dry-run", "--force"]
+
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+
+        if result.returncode == 0:
+            return jsonify(success=True)
+        else:
+            return jsonify(success=False, message=result.stderr or result.stdout)
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify(success=False, message=str(e))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,0 +1,40 @@
+name: Setup AWS Nuke Environment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies (Python, Flask, jq, curl)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl python3 python3-pip
+          pip install flask
+
+      - name: Install aws-nuke (latest)
+        run: |
+          LATEST_JSON=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest)
+          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("linux-amd64.tar.gz$")) | .browser_download_url')
+
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "❌ aws-nuke binary not found in release."
+            exit 1
+          fi
+
+          curl -L -o aws-nuke.tar.gz "$DOWNLOAD_URL"
+          mkdir -p aws-nuke-extract
+          tar -xzf aws-nuke.tar.gz -C aws-nuke-extract
+          chmod +x aws-nuke-extract/aws-nuke
+          sudo mv aws-nuke-extract/aws-nuke /usr/local/bin/aws-nuke
+
+      - name: Confirm aws-nuke installed
+        run: aws-nuke version

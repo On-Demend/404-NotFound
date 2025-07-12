@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Nuke 웹 실행기</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>AWS Nuke 실행 도구</h1>
+  </header>
+
+  <section class="warning">
+    ⚠️ 이 도구를 사용하면 AWS 계정 내 리소스가 삭제되며,  
+    중요한 정보가 노출되지 않도록 주의하십시오.  
+    <strong>저희는 사용자의 정보를 저장하지 않습니다.</strong>
+  </section>
+
+  <main>
+    <form id="nukeForm">
+      <label>계정 별칭 <input type="text" name="alias" required></label>
+      <label>IAM 사용자 이름 <input type="text" name="iam_user" required></label>
+      <label>IAM 로그인 프로파일 이름 <input type="text" name="iam_profile" required></label>
+      <label>계정 ID (12자리) <input type="text" name="account_id" required pattern="\d{12}"></label>
+      <label>제외할 계정 ID <input type="text" name="exclude_id"></label>
+
+      <fieldset>
+        <legend>삭제할 리전 선택</legend>
+        <div class="regions">
+          <label><input type="checkbox" name="regions" value="us-east-1" checked> us-east-1</label>
+          <label><input type="checkbox" name="regions" value="ap-northeast-2"> ap-northeast-2</label>
+          <label><input type="checkbox" name="regions" value="eu-west-1"> eu-west-1</label>
+          <!-- 추가 가능 -->
+        </div>
+      </fieldset>
+
+      <label>AWS Access Key <input type="text" name="aws_access_key" required></label>
+      <label>AWS Secret Key <input type="password" name="aws_secret_key" required></label>
+
+      <label class="checkbox">
+        <input type="checkbox" name="consent" required>
+        위 내용을 확인하였으며 삭제에 동의합니다.
+      </label>
+
+      <button type="submit">확인</button>
+    </form>
+
+    <div id="status"></div>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

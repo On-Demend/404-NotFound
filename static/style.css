@@ -1,0 +1,99 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #ff7eb3, #ff758c, #ffce00, #7afcff, #feff9c);
+  background-size: 200% 200%;
+  animation: gradientMove 10s ease infinite;
+  color: #222;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+header {
+  padding: 1.2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 1.6rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.warning {
+  background: rgba(255, 100, 100, 0.8);
+  color: #fff;
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
+main {
+  max-width: 600px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+form label {
+  display: block;
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+}
+
+form input[type="text"],
+form input[type="password"] {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  box-sizing: border-box;
+}
+
+fieldset {
+  margin-top: 1.2rem;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.regions label {
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.checkbox {
+  margin-top: 1rem;
+}
+
+button {
+  margin-top: 2rem;
+  padding: 0.8rem 1.6rem;
+  border: none;
+  border-radius: 8px;
+  background: #6c63ff;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #574de0;
+}
+
+#status {
+  margin-top: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
