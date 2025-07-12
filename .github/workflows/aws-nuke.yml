@@ -25,25 +25,30 @@ on:
         description: "Dry Run 여부 (true/false)"
         required: false
         default: "true"
-
-  push:
-    branches:
-      - main
+      aws_access_key_id:
+        description: "AWS ACCESS KEY ID"
+        required: true
+      aws_secret_access_key:
+        description: "AWS SECRET ACCESS KEY"
+        required: true
 
 jobs:
   aws-nuke:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
+      AWS_REGION: us-east-1
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      - name: Mask AWS credentials in logs
+        run: |
+          echo "::add-mask::${AWS_ACCESS_KEY_ID}"
+          echo "::add-mask::${AWS_SECRET_ACCESS_KEY}"
 
       - name: Install latest AWS Nuke
         run: |
@@ -72,3 +77,11 @@ jobs:
           echo "        - \"${{ github.event.inputs.iam_user }}\"" >> nuke-config.yaml
           echo "      IAMUserLoginProfile:" >> nuke-config.yaml
           echo "        - \"${{ github.event.inputs.iam_profile }}\"" >> nuke-config.yaml
+
+      - name: Run AWS Nuke
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            aws-nuke -c nuke-config.yaml
+          else
+            aws-nuke -c nuke-config.yaml --no-dry-run --force
+          fi
