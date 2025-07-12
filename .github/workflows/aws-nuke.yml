@@ -53,27 +53,32 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ github.event.inputs.aws_secret_access_key }}" >> $GITHUB_ENV
           echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
 
-      - name: Install AWS Nuke (exact binary)
+      - name: Install AWS Nuke from latest release
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
+          echo "📦 Fetching latest AWS Nuke release..."
           LATEST_JSON=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest)
 
-          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("aws-nuke-.*-linux-amd64$")) | .browser_download_url')
+          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("linux-amd64.tar.gz$")) | .browser_download_url')
 
           if [ -z "$DOWNLOAD_URL" ]; then
-            echo "❌ Could not find linux-amd64 binary in release assets"
-            echo "💡 Available assets:"
+            echo "❌ linux-amd64.tar.gz 파일을 찾을 수 없습니다."
+            echo "🔍 assets 목록:"
             echo "$LATEST_JSON" | jq -r '.assets[].name'
             exit 1
           fi
 
-          curl -L -o aws-nuke "$DOWNLOAD_URL"
-          chmod +x aws-nuke
-          sudo mv aws-nuke /usr/local/bin/aws-nuke
-          echo "✅ Installed AWS Nuke from $DOWNLOAD_URL"
+          echo "⬇️ Downloading: $DOWNLOAD_URL"
+          curl -L -o aws-nuke.tar.gz "$DOWNLOAD_URL"
+          mkdir -p aws-nuke-extract
+          tar -xzf aws-nuke.tar.gz -C aws-nuke-extract
 
+          chmod +x aws-nuke-extract/aws-nuke
+          sudo mv aws-nuke-extract/aws-nuke /usr/local/bin/aws-nuke
+
+          echo "✅ aws-nuke 설치 완료"
 
 
 
