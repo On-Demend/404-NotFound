@@ -108,5 +108,5 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             aws-nuke -c nuke-config.yaml
           else
-            aws-nuke -c nuke-config.yaml --no-dry-run --force
+            aws-nuke nuke -c nuke-config.yaml --no-dry-run --force
           fi
