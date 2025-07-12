@@ -25,6 +25,7 @@ on:
         description: "Dry Run 여부 (true/false)"
         required: false
         default: "true"
+
   push:
     branches:
       - main
@@ -54,10 +55,15 @@ jobs:
       - name: Generate nuke-config.yaml
         run: |
           REGIONS=$(echo "${{ github.event.inputs.regions }}" | sed 's/,/","/g')
+          EXCLUDE_ID="${{ github.event.inputs.exclude_id }}"
+          if [ -z "$EXCLUDE_ID" ]; then
+            EXCLUDE_ID="000000000000"
+          fi
+
           cat <<EOF > nuke-config.yaml
 regions: ["$REGIONS","global"]
 account-blocklist:
-  - "${{ github.event.inputs.exclude_id }}"
+  - "$EXCLUDE_ID"
 accounts:
   "${{ github.event.inputs.account_id }}":
     aliases:
