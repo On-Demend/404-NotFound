@@ -2,9 +2,6 @@ name: AWS Nuke Trigger
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
     inputs:
       alias:
         description: "계정 별칭"
@@ -28,6 +25,9 @@ on:
         description: "Dry Run 여부 (true/false)"
         required: false
         default: "true"
+  push:
+    branches:
+      - main
 
 jobs:
   aws-nuke:
