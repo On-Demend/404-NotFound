@@ -53,24 +53,26 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ github.event.inputs.aws_secret_access_key }}" >> $GITHUB_ENV
           echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
 
-      - name: Install latest AWS Nuke
+      - name: Install AWS Nuke (exact binary)
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
           LATEST_JSON=$(curl -s https://api.github.com/repos/ekristen/aws-nuke/releases/latest)
 
-          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("linux-amd64$")) | .browser_download_url')
+          DOWNLOAD_URL=$(echo "$LATEST_JSON" | jq -r '.assets[] | select(.name | test("aws-nuke-.*-linux-amd64$")) | .browser_download_url')
 
           if [ -z "$DOWNLOAD_URL" ]; then
-            echo "❌ Failed to find linux-amd64 binary in latest release assets"
+            echo "❌ Could not find linux-amd64 binary in release assets"
+            echo "💡 Available assets:"
+            echo "$LATEST_JSON" | jq -r '.assets[].name'
             exit 1
           fi
 
           curl -L -o aws-nuke "$DOWNLOAD_URL"
-
           chmod +x aws-nuke
           sudo mv aws-nuke /usr/local/bin/aws-nuke
+          echo "✅ Installed AWS Nuke from $DOWNLOAD_URL"
 
 
 
