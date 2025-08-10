@@ -1,16 +1,8 @@
 name: aws-nuke
-
 on:
   push:
     paths:
-      - "trigger.txt"   # 최상위 trigger.txt 변경 시 실행
-
-permissions:
-  contents: read
-
-concurrency:
-  group: aws-nuke
-  cancel-in-progress: false
+      - "trigger.txt"
 
 jobs:
   nuke:
@@ -19,28 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # AWS 크레덴셜 구성 (Secrets 사용)
-      - name: Configure AWS CLI
-        run: |
-          aws --version || (sudo apt-get update && sudo apt-get install -y awscli)
-          mkdir -p ~/.aws
-          cat > ~/.aws/credentials <<EOF
-          [default]
-          aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          EOF
-          aws sts get-caller-identity
+      - name: Configure AWS credentials (supports static or STS)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}   # 임시키면 필수
+          aws-region: ap-northeast-2
 
-      # 계정 화이트리스트 확인
-      - name: Check allowed account
-        run: |
-          ACC=$(aws sts get-caller-identity --query Account --output text)
-          case "$ACC" in
-            ${{ secrets.TARGET_ACCOUNT_ID }}) echo "Allowed account $ACC";;
-            *) echo "Blocked account $ACC"; exit 1;;
-          esac
+      - name: Who am I?
+        run: aws sts get-caller-identity
 
-      # config.yml 생성 (템플릿 치환)
       - name: Generate aws-nuke config
         run: |
           sed \
@@ -50,7 +31,6 @@ jobs:
             -e "s|\${KEEP_ACCESS_KEY_ID}|${{ secrets.KEEP_ACCESS_KEY_ID }}|g" \
             .ops/nuke/config.template.yml > config.yml
 
-      # aws-nuke 다운로드 및 설치
       - name: Download aws-nuke v3.56.2
         run: |
           curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.56.2/aws-nuke-v3.56.2-linux-amd64.tar.gz" -o aws-nuke.tar.gz
@@ -59,7 +39,6 @@ jobs:
           chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
-      # 실제 삭제
       - name: Nuke (actual)
         run: |
           echo "===== Nuke started ====="
