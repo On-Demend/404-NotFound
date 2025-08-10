@@ -54,7 +54,8 @@ jobs:
           set -euo pipefail
           curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.56.2/aws-nuke-v3.56.2-linux-amd64.tar.gz" -o aws-nuke.tar.gz
           tar -xzf aws-nuke.tar.gz
-          sudo mv aws-nuke-v3.56.2-linux-amd64 /usr/local/bin/aws-nuke
+          BIN_NAME=$(tar -tzf aws-nuke.tar.gz | head -n 1)
+          sudo mv "$BIN_NAME" /usr/local/bin/aws-nuke
           sudo chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
