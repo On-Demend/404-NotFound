@@ -68,5 +68,5 @@ jobs:
       - name: Nuke (actual)
         run: |
           echo "===== Nuke started ====="
-          /usr/local/bin/aws-nuke -c config.yml --no-dry-run --force
+          /usr/local/bin/aws-nuke nuke -c config.yml --no-dry-run --force
           echo "===== Nuke completed ====="
