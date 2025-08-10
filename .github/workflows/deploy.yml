@@ -54,13 +54,19 @@ jobs:
           set -euo pipefail
           curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.56.2/aws-nuke-v3.56.2-linux-amd64.tar.gz" -o aws-nuke.tar.gz
           tar -xzf aws-nuke.tar.gz
-          BIN_NAME=$(tar -tzf aws-nuke.tar.gz | head -n 1)
+          BIN_NAME=$(tar -tzf aws-nuke.tar.gz | grep -E '^aws-nuke(|-v[0-9].*linux-amd64)$' | head -n1 || true)
+          if [ -z "$BIN_NAME" ]; then
+            BIN_NAME=$(tar -tzf aws-nuke.tar.gz | grep -E '^aws-nuke[^/]*$' | head -n1 || true)
+          fi
+          if [ -z "$BIN_NAME" ]; then
+            BIN_NAME=$(tar -tzf aws-nuke.tar.gz | grep -v -E '(LICENSE|README|\\.md|\\.txt|\\.pem|\\.sig|/)$' | head -n1)
+          fi
           sudo mv "$BIN_NAME" /usr/local/bin/aws-nuke
           sudo chmod +x /usr/local/bin/aws-nuke
-          aws-nuke version
+          /usr/local/bin/aws-nuke version
 
       - name: Nuke (actual)
         run: |
           echo "===== Nuke started ====="
-          aws-nuke -c config.yml --no-dry-run --force
+          /usr/local/bin/aws-nuke -c config.yml --no-dry-run --force
           echo "===== Nuke completed ====="
