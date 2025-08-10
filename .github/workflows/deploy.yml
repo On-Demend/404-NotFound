@@ -1,4 +1,5 @@
 name: aws-nuke
+
 on:
   push:
     paths:
@@ -15,7 +16,7 @@ jobs:
   nuke:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: nuke-approve   # <- 이 환경에 Required reviewers 설정
+    environment: nuke-approve
     steps:
       - uses: actions/checkout@v4
 
@@ -24,11 +25,20 @@ jobs:
         with:
           aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }} # 임시키면 필수
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ap-northeast-2
 
       - name: Who am I?
         run: aws sts get-caller-identity
+
+      - name: Check allowed account
+        run: |
+          ACC=$(aws sts get-caller-identity --query Account --output text)
+          if [ "$ACC" != "${{ secrets.TARGET_ACCOUNT_ID }}" ]; then
+            echo "Blocked account $ACC (expected ${{ secrets.TARGET_ACCOUNT_ID }})"
+            exit 1
+          fi
+          echo "Allowed account $ACC"
 
       - name: Generate aws-nuke config
         run: |
@@ -41,11 +51,15 @@ jobs:
 
       - name: Download aws-nuke v3.56.2
         run: |
+          set -euo pipefail
           curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.56.2/aws-nuke-v3.56.2-linux-amd64.tar.gz" -o aws-nuke.tar.gz
           tar -xzf aws-nuke.tar.gz
-          sudo mv aws-nuke-v3.56.2-linux-amd64/aws-nuke /usr/local/bin/aws-nuke
-          chmod +x /usr/local/bin/aws-nuke
+          sudo mv aws-nuke-v3.56.2-linux-amd64 /usr/local/bin/aws-nuke
+          sudo chmod +x /usr/local/bin/aws-nuke
           aws-nuke version
 
       - name: Nuke (actual)
-        run: aws-nuke -c config.yml --no-dry-run --force
+        run: |
+          echo "===== Nuke started ====="
+          aws-nuke -c config.yml --no-dry-run --force
+          echo "===== Nuke completed ====="
