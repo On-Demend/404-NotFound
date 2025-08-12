@@ -28,7 +28,7 @@ jobs:
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ap-northeast-2
 
-      - name: Who am I?
+      - name: Identity
         run: aws sts get-caller-identity
 
       - name: Check allowed account
@@ -65,8 +65,6 @@ jobs:
           sudo chmod +x /usr/local/bin/aws-nuke
           /usr/local/bin/aws-nuke version
 
-      - name: Nuke (actual)
+      - name: Nuke
         run: |
-          echo "===== Nuke started ====="
           /usr/local/bin/aws-nuke nuke -c config.yml --no-dry-run --force
-          echo "===== Nuke completed ====="
