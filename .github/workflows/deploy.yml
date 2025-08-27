@@ -15,7 +15,7 @@ concurrency:
 jobs:
   nuke:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 100
     environment: nuke-approve
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
             -e "s|\${KEEP_ACCESS_KEY_ID}|${{ secrets.KEEP_ACCESS_KEY_ID }}|g" \
             .ops/nuke/config.template.yml > config.yml
 
-      - name: Download aws-nuke v3.56.2
+      - name: Download aws-nuke
         run: |
           set -euo pipefail
           curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.56.4/aws-nuke-v3.56.4-linux-amd64.tar.gz" -o aws-nuke.tar.gz
