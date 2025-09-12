@@ -69,4 +69,5 @@ jobs:
       - name: Nuke
         run: |
           export FORCE_COLOR=1
+          export TERM=xterm-256color
           /usr/local/bin/aws-nuke nuke -c config.yml --no-dry-run --force
