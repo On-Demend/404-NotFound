@@ -70,4 +70,4 @@ jobs:
           echo "TERM=xterm-256color" >> $GITHUB_ENV
       - name: Nuke
         run: |
-          /usr/local/bin/aws-nuke nuke -c config.yml --no-dry-run --force
+          /usr/local/bin/aws-nuke nuke -c config.yml --no-dry-run --force | less -R
