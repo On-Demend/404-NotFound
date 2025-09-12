@@ -64,7 +64,8 @@ jobs:
           sudo mv "$BIN_NAME" /usr/local/bin/aws-nuke
           sudo chmod +x /usr/local/bin/aws-nuke
           /usr/local/bin/aws-nuke version
-
+      - name: Force color output
+        run: echo "FORCE_COLOR=1" >> $GITHUB_ENV
       - name: Nuke
         run: |
           export FORCE_COLOR=1
