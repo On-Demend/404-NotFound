@@ -52,7 +52,7 @@ jobs:
       - name: Download aws-nuke
         run: |
           set -euo pipefail
-          curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.61.0/aws-nuke-v3.61.0-linux-amd64.tar.gz" -o aws-nuke.tar.gz
+          curl -L "https://github.com/ekristen/aws-nuke/releases/download/v3.62.2/aws-nuke-v3.62.2-linux-amd64.tar.gz" -o aws-nuke.tar.gz
           tar -xzf aws-nuke.tar.gz
           BIN_NAME=$(tar -tzf aws-nuke.tar.gz | grep -E '^aws-nuke(|-v[0-9].*linux-amd64)$' | head -n1 || true)
           if [ -z "$BIN_NAME" ]; then
